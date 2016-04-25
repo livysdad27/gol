@@ -139,8 +139,6 @@ while True:
   for cell in allCells:
     nebCount += collections.Counter(cell.deadNebList)
   
-  print nebCount
-  
   for (x, y) in nebCount:
     if nebCount[(x, y)] > 2:
       bornList.append(Cell(x, y))
