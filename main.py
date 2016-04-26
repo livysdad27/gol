@@ -10,7 +10,7 @@ from pygame.locals import *
 from pygame import gfxdraw
 
 # Set some globals.  FPS is the speed in frames per second
-FPS = .5 
+FPS = 1 
 FPSCLOCK = pygame.time.Clock()
 CELLWIDTH = 5
 CELLHEIGHT = 5
@@ -177,7 +177,7 @@ while True:
   #Detect deadNebList entries that occur more than twice and append those
   #  To the bornlist
   for (x, y) in nebCount:
-    if nebCount[(x, y)] > 2:
+    if nebCount[(x, y)] == 3:
       allCells.append(Cell(x, y))
 
   #Add cells in the bornlist to allCells
@@ -188,7 +188,7 @@ while True:
   allCells = [x for x in allCells if x not in killList]
 
   #Print housekeeping
-  print "k", len(killList), "Tot", len(allCells)
+  #print "k", len(killList), "Tot", len(allCells)
 
   #Ticke the clock
   FPSCLOCK.tick(FPS)
