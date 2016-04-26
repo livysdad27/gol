@@ -12,8 +12,10 @@ from pygame import gfxdraw
 # Set some globals.  FPS is the speed in frames per second
 FPS = .5 
 FPSCLOCK = pygame.time.Clock()
-DISPWIDTH = 100
-DISPHEIGHT = 100
+CELLWIDTH = 5
+CELLHEIGHT = 5
+DISPWIDTH = 300
+DISPHEIGHT = 300
 WHITE = (200, 200, 200)
 BLACK = (0, 0, 0)
 
@@ -22,6 +24,9 @@ if len(sys.argv) > 1:
   level_file = sys.argv[1]
 else:
   level_file = "./glider.txt"
+
+if len(sys.argv) > 2:
+  FPS = float(sys.argv[2])
 
 #Initialize pygame and setup the display
 pygame.init
@@ -51,8 +56,8 @@ class Level(object):
   #Find the center of the display and set the starting
   #  X/Y of the pattern 
   def loadCells(self):
-    dispCenterX = DISPWIDTH / 2
-    dispCenterY = DISPWIDTH / 2
+    dispCenterX = (DISPWIDTH / 2) / CELLWIDTH
+    dispCenterY = (DISPHEIGHT / 2) / CELLHEIGHT
     levelCenterX = self.levelWidth / 2
     levelCenterY = self.levelHeight / 2
     startLeftX = dispCenterX - levelCenterX
@@ -65,21 +70,17 @@ class Level(object):
       x = startLeftX
       for letter in row:
         if letter != ' ':
-          allCells.add(Cell(x, y))
+          allCells.append(Cell(x, y))
         x += 1
       y += 1 
       
 ##################################################
 #Build a player class to control ptb as we play.
 ##################################################
-class Cell(pygame.sprite.Sprite):
+class Cell(object):
   def __init__(self, x, y):
-    super(Cell, self).__init__()
-    self.image = pygame.Surface([1, 1])
-    self.image.fill(BLACK)
-    self.rect = self.image.get_rect()
-    self.rect.x = x
-    self.rect.y = y
+    self.x = x
+    self.y = y
     self.nebList = []
     self.deadNebList = []
     self.liveNebs = 0
@@ -87,9 +88,9 @@ class Cell(pygame.sprite.Sprite):
     #Scan for your neighbors, dead or alive.  Prolly faster
     #  just as a bunch of static calcs.  Put your neighbors
     # in a list for use scanning for alive stuff.
-    for i in (self.rect.x - 1, self.rect.x, self.rect.x +1):
-      for j in (self.rect.y -1, self.rect.y, self.rect.y +1):
-        if (i, j) == (self.rect.x, self.rect.y):
+    for i in (self.x - 1, self.x, self.x +1):
+      for j in (self.y -1, self.y, self.y +1):
+        if (i, j) == (self.x, self.y):
           next
         else:
           self.nebList.append((i, j))
@@ -103,12 +104,12 @@ class Cell(pygame.sprite.Sprite):
     self.deadNebList = list(self.nebList)
     for x, y in self.nebList:
       for cell in allCells:
-        if (x, y) == (cell.rect.x, cell.rect.y):
+        if (x, y) == (cell.x, cell.y):
           self.liveNebs += 1
           self.deadNebList.remove((x, y))
     if (self.liveNebs > 3) or (self.liveNebs < 2):
       killList.append(self)
-      
+    
 ################################################
 #Simple utility function to get if a key has been pressed on the keyboard
 ################################################
@@ -123,7 +124,7 @@ def keyPressed(key):
 #Create an all sprites list
 ################################################
 #Sprtegroup to keep the working list of live cells
-allCells = pygame.sprite.Group()
+allCells = []
 
 ################################################
 #Load a Level File
@@ -146,7 +147,12 @@ while True:
   
   #Set an all whit esurface, draw all the cells, handle display
   DISPSURF.fill(WHITE)
-  allCells.draw(DISPSURF)
+
+  for cell in allCells:
+    DISPSURF.fill(BLACK, (cell.x * CELLWIDTH, cell.y * CELLHEIGHT, CELLWIDTH, CELLHEIGHT))
+
+
+  #allCells.draw(DISPSURF)
   pygame.display.update()
   pygame.display.flip()
 
@@ -157,30 +163,32 @@ while True:
   #  any dead neighbor cell shows up 3 or more times it's a new cell
   #  and gets appended to the born list. 
   nebCount = collections.Counter({})
-  bornList = []
+  #bornList = []
   killList = []
 
   #Run the update method on all cells.
-  allCells.update()
+  for cell in allCells:
+    cell.update()
   
   #Merge up all the deadNebLists and add them to the counter cllection 
   for cell in allCells:
     nebCount += collections.Counter(cell.deadNebList)
-  
+
   #Detect deadNebList entries that occur more than twice and append those
   #  To the bornlist
   for (x, y) in nebCount:
     if nebCount[(x, y)] > 2:
-      bornList.append(Cell(x, y))
+      allCells.append(Cell(x, y))
 
   #Add cells in the bornlist to allCells
-  allCells.add(bornList)
+  #allCells.add(bornList)
   
   #Remove cells in the killList from allCells
-  allCells.remove(killList)
+  #allCells.remove(killList)
+  allCells = [x for x in allCells if x not in killList]
 
   #Print housekeeping
-  print "k", len(killList), "b", len(bornList), "Tot", len(allCells)
+  print "k", len(killList), "Tot", len(allCells)
 
   #Ticke the clock
   FPSCLOCK.tick(FPS)
