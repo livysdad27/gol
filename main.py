@@ -28,6 +28,10 @@ else:
 if len(sys.argv) > 2:
   FPS = float(sys.argv[2])
 
+if len(sys.argv) > 3:
+  CELLWIDTH = float(sys.argv[3])
+  CELLHEIGHT = CELLWIDTH
+
 #Initialize pygame and setup the display
 pygame.init
 
@@ -70,46 +74,29 @@ class Level(object):
       x = startLeftX
       for letter in row:
         if letter != ' ':
-          allCells.append(Cell(x, y))
+          allCells.append((x, y))
         x += 1
       y += 1 
       
 ##################################################
 #Build a player class to control ptb as we play.
 ##################################################
-class Cell(object):
-  def __init__(self, x, y):
-    self.x = x
-    self.y = y
-    self.nebList = []
-    self.deadNebList = []
-    self.liveNebs = 0
-    
     #Scan for your neighbors, dead or alive.  Prolly faster
     #  just as a bunch of static calcs.  Put your neighbors
     # in a list for use scanning for alive stuff.
-    for i in (self.x - 1, self.x, self.x +1):
-      for j in (self.y -1, self.y, self.y +1):
-        if (i, j) == (self.x, self.y):
-          next
-        else:
-          self.nebList.append((i, j))
 
-  #  Update checks for live neighbors to see if I'm dead
-  #    Also it looks for dead cells where it could hope
-  #    to repro.  If I'm dead I go on the killlist. 
-  #    Deadcells are put in deadNebList for sorting.
-  def update(self):
-    self.liveNebs = 0
-    self.deadNebList = list(self.nebList)
-    for x, y in self.nebList:
-      for cell in allCells:
-        if (x, y) == (cell.x, cell.y):
-          self.liveNebs += 1
-          self.deadNebList.remove((x, y))
-    if (self.liveNebs > 3) or (self.liveNebs < 2):
-      killList.append(self)
-    
+def countNbrs((x, y)):
+  liveNbrCount
+  nbrList = [(x - 1, y + 1), (x, y + 1), (x + 1, y + 1), \
+             (x - 1, y),                 (x + 1, y),     \
+             (x - 1, y - 1), (x, y - 1), (x + 1, y - 1)]
+  for nbr in nbrList:
+    for cell in allCells:
+      if nbr == cell:
+        liveNbrCount += 1
+        nbrList.remove(cell)
+  return liveNbrCount, nbrList     
+
 ################################################
 #Simple utility function to get if a key has been pressed on the keyboard
 ################################################
@@ -139,7 +126,6 @@ workingLevel.loadCells()
 ################################################
 generation = 0
 while True:
-  print generation
   #See if we're trying to quit (weird at slow framerates)
   for event in pygame.event.get():
     if event.type == QUIT or keyPressed(K_ESCAPE):
@@ -149,8 +135,8 @@ while True:
   #Set an all whit esurface, draw all the cells, handle display
   DISPSURF.fill(WHITE)
 
-  for cell in allCells:
-    DISPSURF.fill(BLACK, (cell.x * CELLWIDTH, cell.y * CELLHEIGHT, CELLWIDTH, CELLHEIGHT))
+  for x, y in allCells:
+    DISPSURF.fill(BLACK, (x * CELLWIDTH, y * CELLHEIGHT, CELLWIDTH, CELLHEIGHT))
 
 
   #allCells.draw(DISPSURF)
@@ -163,34 +149,32 @@ while True:
   #  of key.  The key is the coordinates of dead neighbor cells.  If 
   #  any dead neighbor cell shows up 3 or more times it's a new cell
   #  and gets appended to the born list. 
-  nebCount = collections.Counter({})
-  #bornList = []
+  deadNbrCount = collections.Counter({})
   killList = []
 
   #Run the update method on all cells.
   for cell in allCells:
-    cell.update()
-  
-  #Merge up all the deadNebLists and add them to the counter cllection 
-  for cell in allCells:
-    nebCount += collections.Counter(cell.deadNebList)
+    living, dead = countNbrs(cell)
+    if (living > 3) or (living < 2):
+      killList.append(cell)
+    deadNbrCount += dead
 
   #Detect deadNebList entries that occur more than twice and append those
   #  To the bornlist
-  for (x, y) in nebCount:
+  for (x, y) in deadNbrCount:
     if nebCount[(x, y)] == 3:
-      allCells.append(Cell(x, y))
+      allCells.append((x, y))
 
-  #Add cells in the bornlist to allCells
-  #allCells.add(bornList)
-  
   #Remove cells in the killList from allCells
   #allCells.remove(killList)
-  allCells = [x for x in allCells if x not in killList]
+  allCells = [z for z in allCells if z not in killList]
+
+  generation += 1
+
+  print generation 
 
   #Print housekeeping
   #print "k", len(killList), "Tot", len(allCells)
 
   #Ticke the clock
-  generation += 1
   FPSCLOCK.tick(FPS)
