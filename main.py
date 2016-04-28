@@ -12,10 +12,10 @@ from pygame import gfxdraw
 # Set some globals.  FPS is the speed in frames per second
 FPS = 1 
 FPSCLOCK = pygame.time.Clock()
-CELLWIDTH = 5
-CELLHEIGHT = 5
-DISPWIDTH = 300
-DISPHEIGHT = 300
+CELLWIDTH = 1 
+CELLHEIGHT = 1 
+DISPWIDTH = 500
+DISPHEIGHT = 500
 WHITE = (200, 200, 200)
 BLACK = (0, 0, 0)
 
@@ -137,8 +137,9 @@ workingLevel.loadCells()
 ################################################
 #  Start the game loop!!!!!!!!
 ################################################
-
+generation = 0
 while True:
+  print generation
   #See if we're trying to quit (weird at slow framerates)
   for event in pygame.event.get():
     if event.type == QUIT or keyPressed(K_ESCAPE):
@@ -191,4 +192,5 @@ while True:
   #print "k", len(killList), "Tot", len(allCells)
 
   #Ticke the clock
+  generation += 1
   FPSCLOCK.tick(FPS)
