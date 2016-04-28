@@ -86,7 +86,7 @@ class Level(object):
     # in a list for use scanning for alive stuff.
 
 def countNbrs((x, y)):
-  liveNbrCount
+  liveNbrCount = 0
   nbrList = [(x - 1, y + 1), (x, y + 1), (x + 1, y + 1), \
              (x - 1, y),                 (x + 1, y),     \
              (x - 1, y - 1), (x, y - 1), (x + 1, y - 1)]
@@ -157,12 +157,12 @@ while True:
     living, dead = countNbrs(cell)
     if (living > 3) or (living < 2):
       killList.append(cell)
-    deadNbrCount += dead
+    deadNbrCount += collections.Counter(dead)
 
   #Detect deadNebList entries that occur more than twice and append those
   #  To the bornlist
   for (x, y) in deadNbrCount:
-    if nebCount[(x, y)] == 3:
+    if deadNbrCount[(x, y)] == 3:
       allCells.append((x, y))
 
   #Remove cells in the killList from allCells
