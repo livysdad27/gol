@@ -90,8 +90,8 @@ def countNbrs((x, y)):
   nbrList = [(x - 1, y + 1), (x, y + 1), (x + 1, y + 1), \
              (x - 1, y),                 (x + 1, y),     \
              (x - 1, y - 1), (x, y - 1), (x + 1, y - 1)]
-  for nbr in nbrList:
-    for cell in allCells:
+  for cell in allCells:
+    for nbr in nbrList:
       if nbr == cell:
         liveNbrCount += 1
         nbrList.remove(cell)
@@ -132,6 +132,8 @@ while True:
       pygame.quit()
       sys.exit()
   
+
+  print generation
   #Set an all whit esurface, draw all the cells, handle display
   DISPSURF.fill(WHITE)
 
@@ -151,6 +153,7 @@ while True:
   #  and gets appended to the born list. 
   deadNbrCount = collections.Counter({})
   killList = []
+  bornList = []
 
   #Run the update method on all cells.
   for cell in allCells:
@@ -159,20 +162,19 @@ while True:
       killList.append(cell)
     deadNbrCount += collections.Counter(dead)
 
+
   #Detect deadNebList entries that occur more than twice and append those
   #  To the bornlist
   for (x, y) in deadNbrCount:
     if deadNbrCount[(x, y)] == 3:
-      allCells.append((x, y))
+      bornList.append((x, y))
 
   #Remove cells in the killList from allCells
   #allCells.remove(killList)
   allCells = [z for z in allCells if z not in killList]
+  allCells += bornList
 
   generation += 1
-
-  print generation 
-
   #Print housekeeping
   #print "k", len(killList), "Tot", len(allCells)
 
