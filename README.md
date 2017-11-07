@@ -1,6 +1,6 @@
-#Regression Test/Sign-Off Notes
+# Regression Test/Sign-Off Notes
 
-###This is what is being done by the Product Owner to sign-off on stories.  This list is dynamic and will change periodically.
+### This is what is being done by the Product Owner to sign-off on stories.  This list is dynamic and will change periodically.
 
 1. Patient - Sign into [https://th.dev.provinnovate.com/dogfood](https://th.dev.provinnovate.com/dogfood) as TeleHeathPresenterTZ in one window using the dogfood endpoint.  Note that anyone with the presenter role in AD will work.
     1. Create a conference
@@ -32,7 +32,7 @@
 7. Disconnect one side from video (one browser window)
 8. Reconnect the conference - all is well?
 
-###Other Checks
+### Other Checks
 * Rerun the checks above while disconnecting one side (close of browser and unplug/disable networking) on both sides in different parts of the process.
 * Rerun the checks above and disconnect network from either side, reconnect to ensure that the reconnect happens.
 * Login as two Telepresenters, see what happens
